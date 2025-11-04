@@ -1,6 +1,3 @@
-# Exam export artifacts
-export/*.pdf
-
 # LaTeX auxiliary files
 export/*.aux
 export/*.log
