@@ -1,0 +1,135 @@
+\documentclass[12pt, a4paper $if(answers)$, answers $endif$]{exam}
+
+\usepackage{polyglossia}
+$if(lang)$
+\setdefaultlanguage{$lang$}
+$else$
+\setdefaultlanguage{spanish}
+$endif$
+
+\usepackage[babel]{microtype}
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{booktabs}
+
+\usepackage{unicode-math}
+\defaultfontfeatures{Ligatures=TeX}
+$if(mainfont)$
+\setmainfont{$mainfont$}
+$else$
+\setmainfont{Liberation Serif}
+$endif$
+$if(sansfont)$
+\setsansfont[Scale=MatchLowercase]{$sansfont$}
+$else$
+\setsansfont[Scale=MatchLowercase]{Liberation Sans}
+$endif$
+$if(monofont)$
+\setmonofont[Scale=MatchLowercase]{$monofont$}
+$else$
+\setmonofont[Scale=MatchLowercase]{Liberation Mono}
+$endif$
+$if(mathfont)$
+\setmathfont[Scale=MatchLowercase]{$mathfont$}
+$else$
+\setmathfont[Scale=MatchLowercase]{Latin Modern Math}
+$endif$
+
+\usepackage[svgnames]{xcolor}
+
+$if(tikz)$
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+$endif$
+
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle={\bfseries\color{Green}},
+  keywordstyle={[2]\color{Green}},
+  commentstyle={\color{Gray}},
+  stringstyle={\color{IndianRed}},
+}
+\newcommand{\passthrough}[1]{#1}
+
+% for some reason pandoc uses this
+\newcommand{\tightlist}{}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\providecommand{\phantomsection}{}
+
+\newcommand{\explanguage}{$exam-lang$}
+\ifx\explanguage\empty
+  \renewcommand{\explanguage}{es}
+\fi
+\newcommand{\spanishlang}{es}
+
+\newcommand{\examquestionlabel}{}
+\newcommand{\examsolutionlabel}{}
+\ifx\explanguage\spanishlang
+  \renewcommand{\examquestionlabel}{Ejercicio}
+  \renewcommand{\examsolutionlabel}{Solución}
+ \else
+  \renewcommand{\examquestionlabel}{Question}
+  \renewcommand{\examsolutionlabel}{Solution}
+ \fi
+
+$if(answers)$
+\shadedsolutions
+\renewcommand{\solutiontitle}{\noindent\textbf{\examsolutionlabel: }\enspace}
+$endif$
+
+$if(department)$
+\newcommand{\examdepartment}{\Large\textsc{$department$}}
+$else$
+\ifx\explanguage\spanishlang
+  \newcommand{\examdepartment}{\Large\textsc{Departamento de Matemáticas}}
+ \else
+  \newcommand{\examdepartment}{\Large\textsc{Department of Mathematics}}
+ \fi
+$endif$
+
+$if(logo)$
+\newcommand{\examlogo}{\raisebox{-0.25\height}{\includegraphics[height=2cm]{\detokenize{$logo$}}}}
+$else$
+\newcommand{\examlogo}{}
+$endif$
+
+\newcommand{\exampagecount}{}
+\newcommand{\examfootermessage}{}
+\ifx\explanguage\spanishlang
+  \renewcommand{\exampagecount}{Página \thepage{} de \numpages{}}
+  \renewcommand{\examfootermessage}{\iflastpage{\emph{Fin del examen}}{\emph{Continúa en la siguiente página}}}
+\else
+  \renewcommand{\exampagecount}{Page \thepage{} of \numpages{}}
+  \renewcommand{\examfootermessage}{\iflastpage{\emph{End of exam}}{\emph{Continue on the next page}}}
+\fi
+
+\header{\examdepartment}{}{\examlogo}
+\footer{}{\exampagecount}{\examfootermessage}
+\runningheadrule{}
+
+\renewcommand{\thequestion}{\bfseries \sffamily \examquestionlabel\ \arabic{question}}
+\renewcommand{\thepartno}{\arabic{question}.\alph{partno}}
+
+\title{\sffamily $title$}
+\author{$course.long$}
+\date{$date$}
+
+\begin{document}
+\maketitle
+\thispagestyle{headandfoot}
+
+$if(preamble)$
+\emph{$preamble$}
+$endif$
+
+\begin{questions}
+    $body$
+\end{questions}
+\end{document}

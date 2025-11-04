@@ -1,0 +1,14 @@
+# Exam export artifacts
+export/*.pdf
+
+# LaTeX auxiliary files
+export/*.aux
+export/*.log
+export/*.out
+export/*.toc
+
+# Editor/OS cruft
+.DS_Store
+.vscode/
+.idea/
+.AGENTS.md
