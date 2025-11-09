@@ -1,13 +1,51 @@
-# Guía De Exportación Del Examen
+# Generador de Exámenes (Pandoc + LaTeX)
+
+<img src="md-to-pdf-exam.png" alt="md-to-pdf-exam logo" width="400">
+
+Este repositorio contiene una plantilla bilingüe (español/inglés) para producir
+exámenes digitales en PDF usando Pandoc, filtros Lua y una base LaTeX creada originalmente
+por [Driss Drissi](https://idrissi.eu/post/exam-template/). Las preguntas se escriben
+en Markdown y las soluciones se pueden almacenar en un documento separado e inyectar
+automáticamente.
 
 > Documentation in English is available in [README.md](README.md).
 
-## Requisitos previos
-1. Sistema Linux con acceso a Internet para instalar dependencias.
-2. Paquetes básicos de LaTeX (`lualatex`) y Pandoc.
-3. Fuentes Liberation (se instalan junto a la mayoría de distribuciones o con `sudo apt install fonts-liberation`).
+## Características
+- Soporte para dos idiomas (`--lang es` o `--lang en`).
+- Plantilla LaTeX compartida con bloques de solución sombreados.
+- Archivos de soluciones externos (`exam/solutions_es.md` / `exam/solutions_en.md`) vinculados mediante
+  los metadatos `solutions-file`.
+- Ejemplos matemáticos mínimos en ambos idiomas (`exam/questions_es.md` y `exam/questions_en.md`).
 
-## Instalación de dependencias
+## Inicio rápido
+```bash
+# Generar examen en español (por defecto)
+./scripts/export.sh
+
+# Generar examen en español con respuestas
+./scripts/export.sh --answers
+
+# Generar examen en inglés
+./scripts/export.sh --lang en
+
+# Generar examen en inglés con respuestas
+./scripts/export.sh --lang en --answers
+```
+
+El script crea PDFs en `export/`:
+- `export/exam.pdf` y `export/exam_answers.pdf` para la muestra en español.
+- `export/exam_en.pdf` y `export/exam_en_answers.pdf` para la muestra en inglés.
+
+Limpia el directorio antes de hacer commit si no deseas versionar los archivos generados.
+
+Los PDFs generados contienen un conjunto muy pequeño de ejercicios matemáticos que puedes reemplazar con tu propio contenido.
+
+## Requisitos
+- Pandoc (≥ 3.x recomendado).
+- Distribución LaTeX con `lualatex`.
+- Fuentes Liberation (instala `fonts-liberation` / `fonts-liberation2` dependiendo de tu distribución).
+
+### Instalación de dependencias
 - **Ubuntu / Debian**
   ```bash
   sudo apt update
@@ -46,30 +84,28 @@ pandoc --version
 lualatex --version
 ```
 
-## Exportar el examen
-1. Lanza el script preparado desde la raíz del repositorio:
-   ```bash
-   ./scripts/export.sh
-   ```
-   - El PDF se genera en `export/exam.pdf`.
-   - El script crea automáticamente un directorio de caché en `.texmf-var` y exporta `TEXMFVAR` para evitar errores de `luaotfload` en instalaciones empaquetadas (por ejemplo, Fedora).
-2. Para incluir las soluciones en el PDF (con bloques sombreados mediante la plantilla) utiliza:
-   ```bash
-   ./scripts/export.sh --answers
-   ```
-   - Se crea `export/exam_answers.pdf`.
-3. Para exportar en inglés añade `--lang en` (puedes combinarlo con `--answers`).
-   - La versión inglesa se guarda como `export/exam_en.pdf` o `export/exam_en_answers.pdf` si añades soluciones.
-4. Cambia el motor LaTeX exportando la variable antes del script (por ejemplo, `PDF_ENGINE=xelatex ./scripts/export.sh`).
-
-Los PDF contienen un ejemplo muy sencillo de operaciones matemáticas que puedes sustituir por tus propias preguntas y soluciones.
+## Estructura del repositorio
+```
+filters/          # Filtros Lua (inyector de soluciones)
+exam/             # Enunciados de ejemplo (questions_es.md / questions_en.md)
+scripts/          # Exportador CLI
+templates/        # Plantilla LaTeX y recursos originales
+export/           # PDFs de salida (ignorado)
+```
 
 ## Personalización
+1. Edita `exam/questions_es.md` o `exam/questions_en.md` para ajustar los enunciados de ejemplo.
+2. Coloca bloques `::: {#id .solution-placeholder}` donde debe aparecer cada respuesta. Usa los mismos IDs en el archivo de soluciones correspondiente
+   (`exam/solutions_es.md` o `exam/solutions_en.md`) como
+   `::: {#id .solution}` conteniendo la respuesta real en sintaxis compatible con LaTeX.
+3. Actualiza los metadatos del encabezado para configurar fuentes, departamento, logo, etc.
+
+### Personalización avanzada
 1. Las tipografías por defecto son Liberation y se definen en `exam/questions_es.md`. Ajusta los valores `mainfont`, `sansfont`, `monofont` y `mathfont` si deseas otras fuentes instaladas en el sistema.
 2. El encabezado admite metadatos opcionales: `department` y `logo` (ruta relativa al repositorio). El primero aparece alineado a la izquierda en mayúsculas pequeñas y el segundo a la derecha.
 3. Para modificar cabeceras, pie de página o estilos de pregunta edita `templates/exam-template/exam-template.tex`.
-4. Las soluciones se guardan en `exam/solutions_es.md` (y en inglés en `exam/solutions_en.md`). como bloques `::: {#id .solution}` y se inyectan sobre los marcadores `::: {#id .solution-placeholder}` del enunciado.
-5. Los filtros Lua aplicados son `filters/solution_injector.lua` (inyecta soluciones) y `templates/exam-template/exam-filter.lua` (convierte `@q`).
+4. Los filtros Lua aplicados son `filters/solution_injector.lua` (inyecta soluciones) y `templates/exam-template/exam-filter.lua` (convierte `@q`).
+5. Cambia el motor LaTeX exportando la variable antes del script (por ejemplo, `PDF_ENGINE=xelatex ./scripts/export.sh`).
 
 ## Verificación y resolución de problemas
 1. Si el comando falla por fuentes no encontradas, confirma su instalación con `fc-list | grep "NombreDeLaFuente"`.
@@ -84,18 +120,6 @@ Los PDF contienen un ejemplo muy sencillo de operaciones matemáticas que puedes
      -V log=exam.log -o export/exam_debug.pdf
    ```
 3. Ejecuta `npx markdownlint "**/*.md"` para revisar el formato Markdown antes de generar el PDF.
-
-## Estructura del repositorio
-- `exam/`: ejemplos mínimos (`questions_es.md` / `questions_en.md`) y sus soluciones (`solutions_es.md` / `solutions_en.md`).
-- `templates/exam-template/`: plantilla LaTeX, filtro Lua y recursos.
-- `filters/`: filtros Lua propios (`solution_injector.lua`).
-- `scripts/`: utilidades para compilar (`export.sh`).
-- `export/`: PDFs generados (limpia esta carpeta antes de subir a GitHub).
-
-## Historial reciente
-- Simplificación a dos muestras básicas (es/en) en la carpeta `exam/`.
-- Inserción automática de soluciones mediante bloques `solution-placeholder`.
-- Normalización de la notación LaTeX en todas las respuestas.
 
 ## Créditos
 - Plantilla base de examen por [Driss Drissi](https://idrissi.eu/post/exam-template/), adaptada y traducida para este proyecto.

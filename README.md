@@ -1,5 +1,7 @@
 # Exam Generator (Pandoc + LaTeX)
 
+<img src="md-to-pdf-exam.png" alt="md-to-pdf-exam logo" width="400">
+
 This repository contains a bilingual template (Spanish/English) to produce
 digital exams in PDF using Pandoc, Lua filters, and a LaTeX base originally
 created by [Driss Drissi](https://idrissi.eu/post/exam-template/). Questions live
@@ -76,6 +78,12 @@ The generated PDFs contain a very small set of maths exercises you can replace w
   3. Install [Liberation fonts](https://github.com/liberationfonts/liberation-fonts/releases) (run the `.ttf` installers).
   4. Add the Pandoc and MiKTeX binaries to the `PATH` environment variable if the installers do not do it automatically.
 
+Check that Pandoc and the LaTeX engine work:
+```bash
+pandoc --version
+lualatex --version
+```
+
 ## Repository layout
 ```
 filters/          # Lua filters (solution injector)
@@ -93,7 +101,28 @@ export/           # Output PDFs (ignored)
    `::: {#id .solution}` containing the actual answer in LaTeX-friendly syntax.
 3. Update the header metadata to set fonts, department, logo, etc.
 
+### Advanced customisation
+1. Default fonts are Liberation and are defined in `exam/questions_es.md`. Adjust the `mainfont`, `sansfont`, `monofont` and `mathfont` values if you want other fonts installed on the system.
+2. The header supports optional metadata: `department` and `logo` (relative path to the repository). The first appears left-aligned in small caps and the second on the right.
+3. To modify headers, footers or question styles, edit `templates/exam-template/exam-template.tex`.
+4. The Lua filters applied are `filters/solution_injector.lua` (injects solutions) and `templates/exam-template/exam-filter.lua` (converts `@q`).
+5. Change the LaTeX engine by exporting the variable before the script (for example, `PDF_ENGINE=xelatex ./scripts/export.sh`).
+
+## Troubleshooting
+1. If the command fails due to missing fonts, confirm their installation with `fc-list | grep "FontName"`.
+2. For LaTeX errors, add `-V log=exam.log` to the Pandoc invocation to get a detailed log:
+   ```bash
+   pandoc exam/questions_es.md \
+     --pdf-engine lualatex \
+     --template templates/exam-template/exam-template.tex \
+     --lua-filter templates/exam-template/exam-filter.lua \
+     --lua-filter filters/solution_injector.lua \
+     --from markdown+tex_math_dollars+tex_math_single_backslash+fenced_divs \
+     -V log=exam.log -o export/exam_debug.pdf
+   ```
+3. Run `npx markdownlint "**/*.md"` to check Markdown formatting before generating the PDF.
+
 ## Credits
 - Original LaTeX exam template by [Driss Drissi](https://idrissi.eu/post/exam-template/)
   (included in `templates/exam-template/` and translated/adapted).
-- Spanish source documentation is available in `README.es.md`.
+- Spanish documentation is available in `README.es.md`.
